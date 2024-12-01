@@ -1,6 +1,7 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class WriteScreen extends StatefulWidget {
   @override
@@ -36,19 +37,18 @@ class _WriteScreenState extends State<WriteScreen> {
 
   _submitContent(String userId, String title, String content) async {
     try {
-      var dio = Dio();
-      var param = {
-        'userId': '$userId',
-        'title': '$title',
-        'content': '$content'
-      };
-      Response response = await dio.post('url 이름');
+      var param = {'title': title, 'content': content};
+      var body = json.encode(param);
+      final response = await http.post(
+          Uri.parse("http://localhost:8080/post?userId=$userId"),
+          headers: {
+            "accept": "*/*",
+            "Content-Type": "application/json",
+            "userId": userId
+          },
+          body: body);
 
       if (response.statusCode == 200) {
-        String result = response.data;
-        _message('작성 성공');
-
-        // 이후 처리
         return true;
       } else {
         _message('내부 서버 오류');
@@ -99,11 +99,12 @@ class _WriteScreenState extends State<WriteScreen> {
                   } else if (_content.text.isEmpty) {
                     _message('내용을 입력하세요');
                   } else {
-                    bool isSuccess = await _submitContent(userId!, _title.text, _content.text);
+                    bool isSuccess = await _submitContent(
+                        userId!, _title.text, _content.text);
                     if (isSuccess) {
                       _message('글이 작성되었습니다.');
-                      _title.text='';
-                      _content.text='';
+                      _title.text = '';
+                      _content.text = '';
                     }
                   }
                 },

@@ -29,15 +29,11 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       var dio = Dio();
       var param = {'userId': '$userId', 'password': '$password'};
-      return true;
-
-      Response response = await dio.post('url 이름');
+      Response response =
+          await dio.post('http://localhost:8080/user/sign-in', data: param);
 
       if (response.statusCode == 200) {
-        String result = response.data;
         _message('로그인 성공');
-
-        // 이후 처리
         return true;
       } else if (response.statusCode == 400) {
         _message('ID가 존재하지 않거나 비밀번호가 잘못되었습니다.');
@@ -92,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
               } else if (password.text.isEmpty) {
                 _message('비밀번호를 입력하세요');
               } else {
-                bool isLoggedIn = await _submitLogin(userId, password);
+                bool isLoggedIn = await _submitLogin(userId.text, password.text);
                 if (isLoggedIn) {
                   await storage.write(key: 'login', value: userId.text);
                   getx.Get.off(MainPage());

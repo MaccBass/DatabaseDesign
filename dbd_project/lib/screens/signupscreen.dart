@@ -35,47 +35,51 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     try {
       var dio = Dio();
-      Response response = await dio.get('url 이름');
+      Response response =
+          await dio.get('http://localhost:8080/user/check-id?userId=$userId');
 
       if (response.statusCode == 200) {
-        var result = response.data;
-        // result 보고 체크하는 부분
-        _message('사용 가능한 아이디 입니다.');
-        idCheck = true;
-
-      } else if (response.statusCode == 400){
-        _message('이미 존재하는 아이디 입니다.');
-
-      }
-      else {
+        var result = response.data['isExist'];
+        if (!result) {
+          _message('사용 가능한 아이디 입니다.');
+          idCheck = true;
+          return true;
+        } else {
+          _message('이미 존재하는 아이디 입니다.');
+          idCheck = false;
+        }
+      } else {
         _message('내부 서버 오류');
+        idCheck = false;
       }
     } catch (e) {
       _message('클라이언트 오류');
+      idCheck = false;
       return false;
     }
+    return false;
   }
 
   _submitJoin(String nickname, String userId, String password) async {
     try {
       var dio = Dio();
       var param = {
-        'nickname': '$nickname',
         'userId': '$userId',
-        'password': '$password'
+        'password': '$password',
+        'nickname': '$nickname'
       };
 
-      Response response = await dio.post('url 이름');
+      Response response =
+          await dio.post('http://localhost:8080/user/sign-up', data: param);
 
       if (response.statusCode == 200) {
-        String result = response.data;
         _message('회원가입 성공');
-
-        // 이후 처리
         return true;
+      } else if (response.statusCode == 400) {
+        _message('이미 존재하는 ID입니다.');
+        return false;
       } else {
         _message('내부 서버 오류');
-        return false;
       }
     } catch (e) {
       _message('클라이언트 오류');
@@ -174,7 +178,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               } else if (!idCheck) {
                 _message('ID 확인을 해주세요');
               } else {
-                bool isJoined = await _submitJoin(nickname.text, userId.text, password.text);
+                bool isJoined = await _submitJoin(
+                    nickname.text, userId.text, password.text);
                 if (isJoined) {
                   await storage.write(key: 'login', value: userId.text);
                   getx.Get.off(MainPage());
