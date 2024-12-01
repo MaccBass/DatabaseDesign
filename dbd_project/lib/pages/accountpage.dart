@@ -3,32 +3,24 @@ import 'package:dbd_project/screens/signupscreen.dart';
 import 'package:flutter/material.dart';
 
 class AccountPage extends StatefulWidget {
-
   @override
   _AccountPageState createState() => _AccountPageState();
 }
 
 class _AccountPageState extends State<AccountPage> {
-  int _selectedIndex=0;
-  List<BottomNavigationBarItem> bottomItems=[
-    BottomNavigationBarItem(
-      label: '로그인',
-      icon: Icon(Icons.account_circle)
-      ),
-    BottomNavigationBarItem(
-      label: '회원가입',
-      icon: Icon(Icons.person_add)
-      ),
+  int _selectedIndex = 0;
+  List<BottomNavigationBarItem> bottomItems = [
+    BottomNavigationBarItem(label: '로그인', icon: Icon(Icons.account_circle)),
+    BottomNavigationBarItem(label: '회원가입', icon: Icon(Icons.person_add)),
   ];
-  List pages=[
-    LoginScreen(),
-    SignUpScreen()
-  ];
+  List pages = [LoginScreen(), SignUpScreen()];
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('계정'),),
+      appBar: AppBar(
+        title: Text('계정'),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,
@@ -37,8 +29,8 @@ class _AccountPageState extends State<AccountPage> {
         selectedFontSize: 14,
         unselectedFontSize: 10,
         currentIndex: _selectedIndex,
-        onTap: (int index){
-          setState((){
+        onTap: (int index) {
+          setState(() {
             _selectedIndex = index;
           });
         },

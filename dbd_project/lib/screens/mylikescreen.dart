@@ -10,7 +10,7 @@ class MyLikeScreen extends StatefulWidget {
 }
 
 class _MyLikeScreenState extends State<MyLikeScreen> {
-  int _page = 1;
+  int _page = 0;
   final int _limit = 30;
   bool _hasNextPage = true;
   bool _isFirstLoadRunning = false;
@@ -23,7 +23,6 @@ class _MyLikeScreenState extends State<MyLikeScreen> {
   @override
   void initState() {
     super.initState();
-    initId();
     _initLoad();
     _controller = ScrollController()..addListener(_nextLoad);
   }
@@ -34,14 +33,17 @@ class _MyLikeScreenState extends State<MyLikeScreen> {
   }
 
   void _initLoad() async {
+    await initId();
     setState(() {
       _isFirstLoadRunning = true;
     });
     try {
       // 쿼리 보내는 부분
-      final res = await http.get(Uri.parse("_url?_page=$_page&_limit=$_limit"));
+      final res = await http.get(
+          Uri.parse("http://localhost:8080/post/liked?userId=$userId"),
+          headers: {"accept": "*/*", "userId": userId!});
       setState(() {
-        _list = json.decode(res.body);
+        _list = jsonDecode(utf8.decode(res.bodyBytes));
       });
     } catch (e) {
       print(e.toString());
@@ -64,16 +66,19 @@ class _MyLikeScreenState extends State<MyLikeScreen> {
       _page += 1;
 
       try {
-        final res =
-            await http.get(Uri.parse("_url?_page=$_page&_limit=$_limit"));
+        final res = await http.get(
+          Uri.parse("http://localhost:8080/post/liked?userId=$userId&pageNo=$_page"),
+          headers: {"accept": "*/*", "userId": userId!});
 
         final List fetchedPosts = json.decode(res.body);
 
         if (fetchedPosts.isNotEmpty) {
+          print('데이터 불러옴. page: $_page');
           setState(() {
             _list.addAll(fetchedPosts);
           });
         } else {
+          print('더이상 불러올 데이터 없음..');
           setState(() {
             _hasNextPage = false;
           });
@@ -100,18 +105,41 @@ class _MyLikeScreenState extends State<MyLikeScreen> {
     return Container(
       child: _isFirstLoadRunning
           ? const Center(child: CircularProgressIndicator())
-          : Expanded(
-              child: ListView.builder(
-                itemCount: _list.length,
-                itemBuilder: (context, index) => PostCard(
-                  title: 'title',
-                  nickname: 'nickname',
-                  createdAt: 'yyyy-mm-dd',
-                  content: 'content',
-                  likeCount: 0,
+          : Column(children: [
+              Expanded(
+                child: ListView.builder(
+                  controller: _controller,
+                  itemCount: _list.length,
+                  itemBuilder: (context, index) => PostCard(
+                    postId: _list[index]['id'],
+                    title: _list[index]['title'],
+                    nickname: _list[index]['nickname'],
+                    createdAt: _list[index]['createdAt'],
+                    content: _list[index]['content'],
+                    likeCount: _list[index]['likeCount'],
+                    isLiked: _list[index]['isLiked'],
+                  ),
                 ),
               ),
-            ),
+              if (_isLoadMoreRunning == true)
+                Container(
+                  padding: const EdgeInsets.all(30),
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              if (_hasNextPage == false)
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  color: Colors.blue,
+                  child: const Center(
+                    child: Text(
+                      'No more data to be fetched.',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+            ]),
     );
   }
 }

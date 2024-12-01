@@ -88,7 +88,8 @@ class _LoginScreenState extends State<LoginScreen> {
               } else if (password.text.isEmpty) {
                 _message('비밀번호를 입력하세요');
               } else {
-                bool isLoggedIn = await _submitLogin(userId.text, password.text);
+                bool isLoggedIn =
+                    await _submitLogin(userId.text, password.text);
                 if (isLoggedIn) {
                   await storage.write(key: 'login', value: userId.text);
                   getx.Get.off(MainPage());

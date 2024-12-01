@@ -21,9 +21,7 @@ class _LandingPageState extends State<LandingPage> {
     return Scaffold(
         body: Stack(
       alignment: Alignment.center,
-      children: [
-        CircularProgressIndicator()
-      ],
+      children: [CircularProgressIndicator()],
     ));
   }
 }

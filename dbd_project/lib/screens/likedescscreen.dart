@@ -4,12 +4,12 @@ import 'package:dbd_project/cards/postcard.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-class HomeScreen extends StatefulWidget {
+class LikeDescScreen extends StatefulWidget {
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _LikeDescScreenState createState() => _LikeDescScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _LikeDescScreenState extends State<LikeDescScreen> {
   int _page = 0;
   final int _limit = 30;
   late int _amount;
@@ -32,7 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     try {
       // 쿼리 보내는 부분
-      final res = await http.get(Uri.parse("http://localhost:8080/post"));
+      final res =
+          await http.get(Uri.parse("http://localhost:8080/post/like-count"));
       setState(() {
         _list = jsonDecode(utf8.decode(res.bodyBytes));
       });
@@ -59,14 +60,13 @@ class _HomeScreenState extends State<HomeScreen> {
       _page += 1;
 
       try {
-        int lastId = _amount - (_page * _limit);
-        final res = await http
-            .get(Uri.parse("http://localhost:8080/post?lastId=$lastId"));
+        final res = await http.get(
+            Uri.parse("http://localhost:8080/post/like-count?pageNo=$_page"));
 
         final List fetchedPosts = json.decode(res.body);
 
         if (fetchedPosts.isNotEmpty) {
-          print('데이터 불러옴. lastId: $lastId');
+          print('데이터 불러옴. pageNo: $_page');
           setState(() {
             _list.addAll(fetchedPosts);
           });
